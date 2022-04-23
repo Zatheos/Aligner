@@ -21,6 +21,10 @@ const examples = [
 	],
 ];
 
+const defaultSelection = {x:1, y:1};
+let currentSelection = {...defaultSelection};
+let currentArray = [];
+
 const getRndTo = int => Math.round(Math.random() * int);
 
 const removeAccents = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -62,7 +66,11 @@ const merge = (...objs) =>
 
 const transpose = arr => arr[0].map((col, i) => arr.map(row => row[i]));
 
-const cleanup = str => str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s+/g, " ").trim().split(" ").map(x => removeAccents(x.toLowerCase().trim()));
+const cleanup = str => str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")
+													.replace(/\s+/g, " ")
+													.trim()
+													.split(" ")
+													.map(x => removeAccents(x.toLowerCase().trim()));
 
 
 const makeTableHTML= myArray => {
@@ -89,7 +97,7 @@ const createTable = arr => {
 		if (rowData[0] !== rowData[1]) row.classList.add("mismatch");
     rowData.forEach((cellData, ind2) => {
       const cell = document.createElement(index === 0 ? 'th' : 'td');
-			if (index === 0 && ind2 === 1) cell.setAttribute("id", "active");
+			if (index === currentSelection.y && ind2 === currentSelection.x) cell.setAttribute("id", "active");
       cell.appendChild(document.createTextNode(cellData));
       row.appendChild(cell);
     });
@@ -125,7 +133,7 @@ const exportDiff = (string1, string2) => {
 	const merged = merge(...padded4parity);
 	console.log("merged");
 	console.log(merged);
-	const ready4csv = transpose([["truth", ...merged.file1], ["hypothesis", ...merged.file2]]); 
+	const ready4csv = transpose([["Truth", ...merged.file1], ["Hypothesis", ...merged.file2]]); 
 	console.log("ready4csv");
 	console.log(ready4csv);
 
@@ -148,22 +156,23 @@ const output2Csv = arr => {
 	console.log("#####################");
 }
 
-const test = () => exportDiff("Okay no not that i'm aware of not that i drove  i drive quite a lot on my own  ",
- "Okay. No, not that I'm aware of. No, but I drew, if I drive quite well  on my.")
-//test();
+const redrawTable = () => {
+	const tableHtml = createTable(currentArray);
+	document.getElementById("result")?.remove();
+	document.getElementById("text-container").appendChild(tableHtml);
+}
 
 const getDiffFromInputs = () => {
+	currentSelection = {...defaultSelection};
 	let truth = document.getElementById("truth").value;
 	let hyp = document.getElementById("hyp").value;
-	console.log("TRUTH: ",truth);
-	console.log("HYP: ", hyp);
 	if (truth === "" && hyp === "") {
 		const ind = getRndTo(examples.length - 1);
 		truth = examples[ind][0];
 		hyp = examples[ind][1];
 	}
-	const initDiff = exportDiff(truth, hyp);
-	const tableHtml = createTable(initDiff);
-	document.getElementById("result")?.remove();
-	document.getElementById("text-container").appendChild(tableHtml);
+	console.log("TRUTH: ",truth);
+	console.log("HYP: ", hyp);
+	currentArray = exportDiff(truth, hyp);
+	redrawTable();
 }

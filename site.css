@@ -177,3 +177,9 @@ table#result, #result th, #result td{
 #result tr.mismatch{
 	background-color: yellow;
 }
+#result #active{
+	background-color: lightblue;
+}
+#result tr.mismatch #active{
+	background-color: skyblue;
+}
