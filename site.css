@@ -1,0 +1,155 @@
+/* ===== COLOURS =======*/
+/*====== FONTS ========*/
+/*======== Vals ========*/
+/*======= ASSIGN VARS ========*/
+/*=== COPY ABOVE TO ALL LESS FILES =====*/
+/*======= START PROPER =======*/
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: #01793d;
+  color: white;
+  scroll-behavior: smooth;
+}
+body * {
+  box-sizing: border-box;
+}
+.header {
+  width: 100%;
+  background: #005416;
+  box-shadow: 2px 0px 2px black;
+  position: sticky;
+  top: 0;
+  height: 50px;
+}
+.header .header-inner {
+  max-width: 1024px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  font-family: 'Nunito', sans-serif;
+  height: 100%;
+}
+.header .header-inner .sigil {
+  font-size: 40px;
+  font-family: 'Jacques Francois Shadow', cursive;
+}
+.header .header-inner ul {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  width: 400px;
+}
+.header .header-inner ul li {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.header .header-inner ul li:hover {
+  background: #003e00;
+  cursor: pointer;
+}
+.main-container {
+  max-width: 1024px;
+  margin: auto;
+  text-align: center;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  font-family: 'Roboto', sans-serif;
+}
+.footer {
+  min-height: 50px;
+  background: #005416;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* width */
+::-webkit-scrollbar {
+  width: 15px;
+}
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+svg {
+  display: block;
+  margin: 0 auto;
+  width: 200px;
+  height: 200px;
+}
+use {
+  fill: white;
+}
+use:nth-of-type(2) {
+  animation: spin 4.7s linear 0.05s infinite alternate;
+}
+use:nth-of-type(1) {
+  animation: spin 4.7s linear infinite alternate;
+}
+use:nth-of-type(4) {
+  animation: spin 5.3s cubic-bezier(0.46, 0.76, 0.53, 0.24) 0.05s infinite;
+}
+use:nth-of-type(3) {
+  animation: spin 5.3s cubic-bezier(0.46, 0.76, 0.53, 0.24) infinite;
+}
+use:nth-of-type(6) {
+  animation: spin 8.3s linear 0.05s infinite;
+}
+use:nth-of-type(5) {
+  animation: spin 8.3s linear infinite;
+}
+use:nth-of-type(1) {
+  fill: white;
+}
+use:nth-of-type(2) {
+  fill: white;
+}
+use:nth-of-type(3) {
+  fill: white;
+}
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+    fill: white;
+  }
+  50% {
+    transform: rotate(180deg);
+    fill: #eee;
+  }
+  100% {
+    transform: rotate(360deg);
+    fill: white;
+  }
+}
+
+.text-container{
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: column;
+}
+textarea, button{
+	margin: 3px;
+}
+textarea{
+	height:100px;
+	width: 500px;
+	font-family: 'Roboto', sans-serif;
+}
