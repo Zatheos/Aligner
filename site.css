@@ -60,7 +60,7 @@ body * {
   max-width: 1024px;
   margin: auto;
   text-align: center;
-  height: 90vh;
+  min-height: 90vh;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
@@ -144,6 +144,7 @@ use:nth-of-type(3) {
 	display: flex;
 	flex-wrap: wrap;
 	flex-direction: column;
+	align-items: center;
 }
 textarea, button{
 	margin: 3px;
@@ -152,4 +153,27 @@ textarea{
 	height:100px;
 	width: 500px;
 	font-family: 'Roboto', sans-serif;
+}
+table#result, #result th, #result td{
+  border: 1px solid black;
+	text-align: left;
+	width: fit-content;
+	margin: 20px;
+	min-width: 150px;
+	color: black;
+}
+
+#result td, #result th{
+	padding: 5px;
+	font-size: 20px;
+}
+
+#result tr{
+	background-color: white;
+}
+#result th{
+	background-color: white;
+}
+#result tr.mismatch{
+	background-color: yellow;
 }

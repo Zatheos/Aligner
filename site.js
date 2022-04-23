@@ -1,3 +1,28 @@
+const examples = [
+	[
+		"uh no i don't think so actually my phone line has uh been cut off       ",
+		"Uh, no, I don't think so. Actually, my phone line has  been cut to."
+	],
+	[
+		"um there's some other shops the uh city tour bus leaves from there as well       ",
+		"Um,  some other shops, the, uh, city tour bus leaves from there."
+	],
+	[
+		"uh did  have a sack of potatoes  in front could have been that but um     ",
+		"Uh, did I have a sack of debt is in front, could have been not boats."
+	],
+	[
+		"I don't know they hire  a lot of lot of newcomers it's bit uh cut and chop with staff  ",
+		"Oh,  no, the, I R a lot, a lot of newcomers. It's better.  Couldn't  shut waste."
+	],
+	[
+		"Okay no not that i'm aware of not that i drove  i drive quite a lot on my own  ",
+		"Okay. No, not that I'm aware of. No, but I drew, if I drive quite well  on my."
+	],
+];
+
+const getRndTo = int => Math.round(Math.random() * int);
+
 const removeAccents = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
 const padArray = obj => {
@@ -39,6 +64,42 @@ const transpose = arr => arr[0].map((col, i) => arr.map(row => row[i]));
 
 const cleanup = str => str.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").replace(/\s+/g, " ").trim().split(" ").map(x => removeAccents(x.toLowerCase().trim()));
 
+
+const makeTableHTML= myArray => {
+	let result = "<table border=1>";
+	for (let i = 0; i < myArray.length; i++) {
+			result += "<tr>";
+			for (let j = 0; j < myArray[i].length; j++){
+					result += i === 0 ? "<th>" + myArray[i][j] + "</th>" : "<td>" + myArray[i][j] + "</td>";
+			}
+			result += "</tr>";
+	}
+	result += "</table>";
+
+	return result;
+}
+
+const createTable = arr => {
+  const table = document.createElement('table');
+	table.setAttribute("id", "result");
+  const tableBody = document.createElement('tbody');
+
+  arr.forEach((rowData, index) => {
+    const row = document.createElement('tr');
+		if (rowData[0] !== rowData[1]) row.classList.add("mismatch");
+    rowData.forEach((cellData, ind2) => {
+      const cell = document.createElement(index === 0 ? 'th' : 'td');
+			if (index === 0 && ind2 === 1) cell.setAttribute("id", "active");
+      cell.appendChild(document.createTextNode(cellData));
+      row.appendChild(cell);
+    });
+    tableBody.appendChild(row);
+  });
+
+  table.appendChild(tableBody);
+  return table;
+}
+
 const exportDiff = (string1, string2) => {
 	const file1mod = cleanup(string1);
 	const file2mod = cleanup(string2);
@@ -67,11 +128,15 @@ const exportDiff = (string1, string2) => {
 	const ready4csv = transpose([["truth", ...merged.file1], ["hypothesis", ...merged.file2]]); 
 	console.log("ready4csv");
 	console.log(ready4csv);
-	const csvStuff = arrayToCSV(ready4csv);
+
+	return ready4csv;
+}
+
+const output2Csv = arr => {
+	const csvStuff = arrayToCSV(arr);
 	console.log("csvStuff");
 	console.log(csvStuff);
 	const csvContent = "data:text/csv;charset=utf-8," + csvStuff;
-
 
 	const encodedUri = encodeURI(csvContent);
 	const link = document.createElement("a");
@@ -88,9 +153,17 @@ const test = () => exportDiff("Okay no not that i'm aware of not that i drove  i
 //test();
 
 const getDiffFromInputs = () => {
-	const truth = document.getElementById("truth");
-	const hyp = document.getElementById("hyp");
-	console.log("TRUTH: ",truth.value);
-	console.log("HYP: ", hyp.value);
-	exportDiff(truth.value, hyp.value);
+	let truth = document.getElementById("truth").value;
+	let hyp = document.getElementById("hyp").value;
+	console.log("TRUTH: ",truth);
+	console.log("HYP: ", hyp);
+	if (truth === "" && hyp === "") {
+		const ind = getRndTo(examples.length - 1);
+		truth = examples[ind][0];
+		hyp = examples[ind][1];
+	}
+	const initDiff = exportDiff(truth, hyp);
+	const tableHtml = createTable(initDiff);
+	document.getElementById("result")?.remove();
+	document.getElementById("text-container").appendChild(tableHtml);
 }
