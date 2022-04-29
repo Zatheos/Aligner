@@ -86,8 +86,14 @@ const examples = [
 ];
 
 const defaultSelection = { x: 1, y: 1 };
-let currentSelection = { ...defaultSelection };
-let currentArray = [];
+let currentActiveTableCell = { ...defaultSelection };
+let currentTableContents = [];
+
+let currentSuperArrayIndex;
+let currentSentenceIndex;
+
+let defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "Truth", "Hypothesis"];
+let cachedCompletedSentences = [defaultHeaders];
 
 const getRndTo = int => Math.round(Math.random() * int);
 
@@ -107,7 +113,6 @@ const padArray = arr => {
 	const length = Math.max(...arr.map(row => row.length));
 	return arr.map(row => Array.from({ length }, (_, i) => i < row.length ? row[i] : ''));
 }
-
 
 const arrayToCSV = (arr, delimiter = ',') =>
 	arr
@@ -147,7 +152,7 @@ const createTable = arr => {
 		if (rowData[0] !== rowData[1]) row.classList.add("mismatch");
 		rowData.forEach((cellData, ind2) => {
 			const cell = document.createElement(index === 0 ? 'th' : 'td');
-			if (index === currentSelection.y && ind2 === currentSelection.x) cell.setAttribute("id", "active");
+			if (index === currentActiveTableCell.y && ind2 === currentActiveTableCell.x) cell.setAttribute("id", "active");
 			cell.appendChild(document.createTextNode(cellData));
 			row.appendChild(cell);
 		});
@@ -161,70 +166,44 @@ const createTable = arr => {
 const exportDiff = (string1, string2) => {
 	const file1mod = cleanup(string1);
 	const file2mod = cleanup(string2);
-
-	console.log("file1");
-	console.log(file1mod);
-	console.log("file2");
-	console.log(file2mod);
-
 	const res = diff(file1mod, file2mod);
-	console.log("initial");
-	console.log(res);
-
 	const decommoned = res.map(x => ({
 		file1: x?.common ?? x.file1,
 		file2: x?.common ?? x.file2
 	}));
-	console.log("decommoned");
-	console.log(decommoned);
 	const padded4parity = decommoned.map(x => padObject(x));
-	console.log("padded4parity");
-	console.log(padded4parity);
 	const merged = merge(...padded4parity);
-	console.log("merged");
-	console.log(merged);
 	const ready4csv = transpose([["Truth", ...merged.file1], ["Hypothesis", ...merged.file2]]);
-	console.log("ready4csv");
-	console.log(ready4csv);
-
 	return ready4csv;
 }
 
-const output2Csv = arr => {
+const output2Csv = (arr, filename = "my_data.csv") => {
+	if (!filename.endsWith(".csv")) filename+= ".csv";
 	const csvStuff = arrayToCSV(arr);
-	console.log("csvStuff");
-	console.log(csvStuff);
 	const csvContent = "data:text/csv;charset=utf-8," + csvStuff;
 
 	const encodedUri = encodeURI(csvContent);
 	const link = document.createElement("a");
 	link.setAttribute("href", encodedUri);
-	link.setAttribute("download", "my_data.csv");
+	link.setAttribute("download", filename);
 	//document.body.appendChild(link); // Required for FF
-
-	link.click(); // This will download the data file named "my_data.csv".
-	console.log("#####################");
+	link.click(); 
 }
 
 const redrawTable = () => {
-	const tableHtml = createTable(currentArray);
+	if (currentTableContents.length < 1) return;
+	const tableHtml = createTable(currentTableContents);
 	document.getElementById("result")?.remove();
 	document.getElementById("text-container").appendChild(tableHtml);
 	addClickTrigger();
 }
 
-const getDiffFromInputs = () => {
-	currentSelection = { ...defaultSelection };
-	let truth = document.getElementById("truth").value;
-	let hyp = document.getElementById("hyp").value;
-	if (truth === "" && hyp === "") {
-		const ind = getRndTo(examples.length - 1);
-		truth = examples[ind][0];
-		hyp = examples[ind][1];
-	}
-	console.log("TRUTH: ", truth);
-	console.log("HYP: ", hyp);
-	currentArray = exportDiff(truth, hyp);
+const getDiffExample = () => {
+	currentActiveTableCell = { ...defaultSelection };
+	const ind = getRndTo(examples.length - 1);
+	const truth = examples[ind][0];
+	const hyp = examples[ind][1];
+	currentTableContents = exportDiff(truth, hyp);
 	redrawTable();
 }
 
@@ -233,3 +212,96 @@ const CSVToArray = (data, delimiter = ',', omitFirstRow = false) =>
 		.slice(omitFirstRow ? data.indexOf('\n') + 1 : 0)
 		.split('\n')
 		.map(v => v.split(delimiter));
+
+const nestedArray2ObjArray = arr => {
+	const [headers,...rows] = arr;
+	const res = rows.map(row => {
+		const el = headers.reduce((object, header, index) => {
+			object[header.trim()] = row[index];
+			return object;
+		}, {});
+		return el;
+	});
+	return res;
+}
+
+const beginWorkWithNewFile = () => {
+	if (truth === undefined || meta === undefined || superArray === undefined || superArray.length <= 0){
+		console.error("Data not found!");
+		return;
+	} else { 
+		currentSuperArrayIndex = 0;
+		const startWith = prompt("Please enter the id of the last record you completed:", "");
+		if (startWith == null || startWith == "") {
+			//get here if prompt is cancelle
+		} else {
+			const foundIndex = superArray.findIndex(x=>x.ResponseId === startWith);
+			if (foundIndex === -1) {
+				if (confirm("Couldn't find that record! Try again?")){
+					beginWorkWithNewFile();
+					return;
+				}
+			} else currentSuperArrayIndex = foundIndex + 1;
+		}
+		startWorkWithNewRecord();
+	}
+}
+const startWorkWithNewRecord = () => {
+	updateRecordIdDisplay();
+	//always start with first sentence for a record
+	currentSentenceIndex = 1;
+	currentActiveTableCell = { ...defaultSelection };
+	const thisTruth = truth[currentSentenceIndex];
+	const thisHyp = superArray[currentSuperArrayIndex][currentSentenceIndex];
+	currentTableContents = exportDiff(thisTruth, thisHyp);
+	redrawTable();
+	updateSentenceIdDisplay();
+
+}
+
+const updateRecordIdDisplay = () => document.getElementById("recordDisplay").innerHTML = "Participant: " + superArray[currentSuperArrayIndex]?.ResponseId;
+const updateSentenceIdDisplay = () => document.getElementById("sentenceDisplay").innerHTML = currentSentenceIndex;
+
+const confirmThisRecordAndGoNext = () => {
+	if (superArray.length === 0) {
+		output2Csv(currentTableContents, "aligner_example.csv");
+		document.getElementById("result").remove();
+		currentTableContents = [];
+		return;
+	}
+	removeSpaces()
+	moveCurrentTableToCache();
+	currentSentenceIndex++;
+	if (superArray[currentSuperArrayIndex][currentSentenceIndex] === undefined){
+		const desiredFilename = `exp-1-participant-${superArray[currentSuperArrayIndex].ResponseId}`;
+		output2Csv(cachedCompletedSentences, desiredFilename);
+		
+		if (++currentSuperArrayIndex > superArray.length - 1){
+			currentTableContents = [];
+			document.getElementById("recordDisplay").innerHTML = "File completed!";
+			document.getElementById("sentenceDisplay").innerHTML = '';
+			const form = document.getElementById("myForm")
+			form.removeAttribute("disabled");
+			form.removeAttribute("hidden");
+			document.getElementById("trangles").style.display = 'block';
+			document.getElementById("result").remove();
+		} else {
+			cachedCompletedSentences = [defaultHeaders];
+			startWorkWithNewRecord();
+		}
+
+	}	else {
+		updateSentenceIdDisplay();
+		currentActiveTableCell = { ...defaultSelection };
+		const thisTruth = truth[currentSentenceIndex];
+		const thisHyp = superArray[currentSuperArrayIndex][currentSentenceIndex];
+		currentTableContents = exportDiff(thisTruth, thisHyp);
+		redrawTable();
+	}
+}
+
+const moveCurrentTableToCache = () => {
+	const [headers, ...keepCells] = currentTableContents;
+	keepCells.forEach(x=>x.unshift(superArray[currentSuperArrayIndex].ResponseId,...meta[currentSentenceIndex].trim().split("-")));
+	cachedCompletedSentences = [...cachedCompletedSentences, ...keepCells];
+}

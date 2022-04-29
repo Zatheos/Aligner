@@ -30,7 +30,7 @@ body * {
   max-width: 1024px;
   margin: auto;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   padding: 0 20px;
   font-family: 'Nunito', sans-serif;
   height: 100%;
@@ -184,4 +184,7 @@ table#result, #result th, #result td{
 }
 #result tr.mismatch #active{
 	background-color: skyblue;
+}
+#recordDisplay{
+	font-size: 40px;
 }
