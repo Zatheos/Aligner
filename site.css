@@ -166,6 +166,8 @@ table#result, #result th, #result td{
 #result td, #result th{
 	padding: 5px;
 	font-size: 20px;
+	height: 33px;
+	user-select: none;
 }
 
 #result tr{
