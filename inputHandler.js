@@ -113,10 +113,10 @@ const addClickTrigger = () => {
 	tds.forEach(td => td.addEventListener('click', onCellClick));
 }
 
-const flagRow = () => {
-	if (currentTableContents[currentActiveTableCell.y][2] === '*') currentTableContents[currentActiveTableCell.y][2] = '';
+const flagRow = (rowNumber = currentActiveTableCell.y) => {
+	if (currentTableContents[rowNumber][2] === '*') currentTableContents[rowNumber][2] = '';
 	else {
-		currentTableContents[currentActiveTableCell.y][2] = '*';
+		currentTableContents[rowNumber][2] = '*';
 		currentTableContents = padArray(currentTableContents);
 	}
 }
