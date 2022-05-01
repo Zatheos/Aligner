@@ -92,8 +92,9 @@ let currentTableContents = [];
 let currentSuperArrayIndex;
 let currentSentenceIndex;
 
-let defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "Truth", "Hypothesis"];
+let defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "Truth", "Hypothesis", "Flagged"];
 let cachedCompletedSentences = [defaultHeaders];
+let cachedCompletedUnformattedSentences = [];
 
 const getRndTo = int => Math.round(Math.random() * int);
 
@@ -146,6 +147,8 @@ const createTable = arr => {
 	const table = document.createElement('table');
 	table.setAttribute("id", "result");
 	const tableBody = document.createElement('tbody');
+	if (currentActiveTableCell.x > 1) currentActiveTableCell.x = 1
+	if (currentActiveTableCell.y > arr.length) currentActiveTableCell.y = arr.length - 1;
 
 	arr.forEach((rowData, index) => {
 		const row = document.createElement('tr');
@@ -196,6 +199,7 @@ const redrawTable = () => {
 	document.getElementById("result")?.remove();
 	document.getElementById("text-container").appendChild(tableHtml);
 	addClickTrigger();
+	document.getElementById("active").scrollIntoView({behavior: "smooth", block: "center", inline: "nearest"});
 }
 
 const getDiffExample = () => {
@@ -273,7 +277,8 @@ const confirmThisRecordAndGoNext = () => {
 	moveCurrentTableToCache();
 	currentSentenceIndex++;
 	if (superArray[currentSuperArrayIndex][currentSentenceIndex] === undefined){
-		const desiredFilename = `exp-1-participant-${superArray[currentSuperArrayIndex].ResponseId}`;
+		for (let i = 0; i < cachedCompletedUnformattedSentences.length; i++) formatArrayForCsv(cachedCompletedUnformattedSentences[i], i + 1);
+		const desiredFilename = `exp1-participant${superArray[currentSuperArrayIndex].ResponseId}-${new Date().toLocaleDateString().replaceAll("\/", "")}`;
 		output2Csv(cachedCompletedSentences, desiredFilename);
 		
 		if (++currentSuperArrayIndex > superArray.length - 1){
@@ -301,7 +306,11 @@ const confirmThisRecordAndGoNext = () => {
 }
 
 const moveCurrentTableToCache = () => {
-	const [headers, ...keepCells] = currentTableContents;
-	keepCells.forEach(x=>x.unshift(superArray[currentSuperArrayIndex].ResponseId,...meta[currentSentenceIndex].trim().split("-")));
+	cachedCompletedUnformattedSentences.push([...currentTableContents]);
+}
+
+const formatArrayForCsv = (arr, ind) => {
+	const [headers, ...keepCells] = arr;
+	keepCells.forEach(x=>x.unshift(superArray[currentSuperArrayIndex].ResponseId,...meta[ind].trim().split("-")));
 	cachedCompletedSentences = [...cachedCompletedSentences, ...keepCells];
 }

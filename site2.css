@@ -67,6 +67,22 @@ body * {
   align-items: center;
   font-family: 'Roboto', sans-serif;
 }
+
+.instructions{ 
+	position: fixed;
+	top: 50%;
+	left: 20px;
+	text-align: left;
+	font-size: 12px;
+}
+
+input:checked + ul{
+	padding-left: 10px;
+	display: block;
+}
+ul {
+	display: none;
+}
 .footer {
   min-height: 50px;
   background: #005416;
@@ -161,6 +177,10 @@ table#result, #result th, #result td{
 	margin: 20px;
 	min-width: 150px;
 	color: black;
+}
+
+#result td:nth-child(3), #result th:nth-child(3){
+	min-width: 0;
 }
 
 #result td, #result th{
