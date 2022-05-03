@@ -5,7 +5,7 @@ let currentTableContents = [];
 let currentSuperArrayIndex;
 let currentSentenceIndex;
 
-let defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "Truth", "Hypothesis", "Flagged"];
+const defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "Truth", "Hypothesis", "Flagged"];
 let cachedCompletedSentences = [defaultHeaders];
 let cachedCompletedUnformattedSentences = [];
 
@@ -165,6 +165,7 @@ const beginWorkWithNewFile = () => {
 }
 const startWorkWithNewRecord = () => {
 	updateRecordIdDisplay();
+	cachedCompletedUnformattedSentences = [];
 	//always start with first sentence for a record
 	currentSentenceIndex = 1;
 	currentActiveTableCell = { ...defaultSelection };
@@ -181,6 +182,7 @@ const updateSentenceIdDisplay = () => document.getElementById("sentenceDisplay")
 
 const confirmThisRecordAndGoNext = () => {
 	if (superArray.length === 0) {
+		//example data case
 		output2Csv(currentTableContents, "aligner_example.csv");
 		document.getElementById("result").remove();
 		currentTableContents = [];
@@ -190,11 +192,13 @@ const confirmThisRecordAndGoNext = () => {
 	moveCurrentTableToCache();
 	currentSentenceIndex++;
 	if (superArray[currentSuperArrayIndex][currentSentenceIndex] === undefined){
+		//end of this participant - do download
 		for (let i = 0; i < cachedCompletedUnformattedSentences.length; i++) formatArrayForCsv(cachedCompletedUnformattedSentences[i], i + 1);
 		const desiredFilename = `exp1-participant${superArray[currentSuperArrayIndex].ResponseId}-${new Date().toLocaleDateString().replaceAll("\/", "")}`;
 		output2Csv(cachedCompletedSentences, desiredFilename);
 		
 		if (++currentSuperArrayIndex > superArray.length - 1){
+			//no more participants - finished
 			currentTableContents = [];
 			document.getElementById("recordDisplay").innerHTML = "File completed!";
 			document.getElementById("sentenceDisplay").innerHTML = '';
