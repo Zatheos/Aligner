@@ -11,50 +11,10 @@ body {
   box-sizing: border-box;
 }
 body {
-  background-color: #01793d;
-  color: white;
   scroll-behavior: smooth;
 }
 body * {
   box-sizing: border-box;
-}
-.header {
-  width: 100%;
-  background: #005416;
-  box-shadow: 2px 0px 2px black;
-  position: sticky;
-  top: 0;
-  height: 50px;
-}
-.header .header-inner {
-  max-width: 1024px;
-  margin: auto;
-  display: flex;
-  justify-content: center;
-  padding: 0 20px;
-  font-family: 'Nunito', sans-serif;
-  height: 100%;
-}
-.header .header-inner .sigil {
-  font-size: 40px;
-  font-family: 'Jacques Francois Shadow', cursive;
-}
-.header .header-inner ul {
-  list-style: none;
-  display: flex;
-  justify-content: space-between;
-  margin: 0;
-  width: 400px;
-}
-.header .header-inner ul li {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.header .header-inner ul li:hover {
-  background: #003e00;
-  cursor: pointer;
 }
 .main-container {
   max-width: 1024px;
@@ -83,13 +43,41 @@ input:checked + ul{
 ul {
 	display: none;
 }
-.footer {
-  min-height: 50px;
-  background: #005416;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.footer_content{
+    max-width:1280px;
+    margin: auto;
 }
+footer{
+	color: white;
+	background-color: #0C5E70;
+	position: relative;
+	margin-top: 30px;
+	flex-shrink: 0;
+}
+.contact{
+    padding: 20px 0; 
+}
+.contact_body{
+    font-size: 20px;
+    font-family:'Poppins', sans-serif;
+		display: flex;
+		justify-content: center;
+}
+.contact_body a{
+	color: white;
+	text-decoration: none;
+	padding: 20px;
+}
+.contact_body a:hover{
+	color: lightskyblue;
+	transition: 0.25s;
+}
+.contact img{
+	height: 1.5em;
+	filter: invert(100%);
+	vertical-align: middle;
+}
+
 /* width */
 ::-webkit-scrollbar {
   width: 15px;
@@ -148,7 +136,7 @@ use:nth-of-type(3) {
   }
   50% {
     transform: rotate(180deg);
-    fill: #eee;
+    fill: rgb(250, 250, 250);
   }
   100% {
     transform: rotate(360deg);
@@ -207,4 +195,52 @@ table#result, #result th, #result td{
 }
 #recordDisplay{
 	font-size: 40px;
+}
+
+
+header{
+	background: #0C5E70;
+	font-size: 18px;
+	width: 100%;
+	margin: 0 0 35px;
+	position: sticky;
+	top:0;
+}
+.nav_bar{
+	display: flex;
+
+}
+header a{
+	text-decoration: none;
+	color: white;
+	font-family: 'Atkinson Hyperlegible', sans-serif;
+	font-family: 'Poppins', sans-serif;
+	/* font-weight: bold; */
+	letter-spacing: 0.025em;
+	padding: 20px;
+}
+header a:hover{
+color: lightskyblue;
+transition: 0.25s;
+}
+.header_container{
+	display: flex;
+	justify-content: center;
+	max-width: 1280px;
+	margin: auto;
+}
+.splash{
+	color:#0C5E70;
+	font-size: 64px;
+	font-family: 'Atkinson Hyperlegible', sans-serif;
+	font-family: 'Poppins', sans-serif;
+	font-weight: 600;
+	letter-spacing: 0.025em;
+	width: 100%;
+	text-align: center;
+
+	margin: 0 0 35px;
+}
+.subheading{
+	font-size:28px;
 }
