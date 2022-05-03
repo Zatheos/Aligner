@@ -8,6 +8,7 @@ let currentSentenceIndex;
 const defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "Truth", "Hypothesis", "Flagged"];
 let cachedCompletedSentences = [defaultHeaders];
 let cachedCompletedUnformattedSentences = [];
+let mostRecentDiffStart;
 
 const getRndTo = int => Math.round(Math.random() * int);
 
@@ -89,6 +90,7 @@ const exportDiff = (string1, string2) => {
 	}));
 	const padded4parity = decommoned.map(x => padObject(x));
 	const merged = merge(...padded4parity);
+	mostRecentDiffStart = merged.file2.reduce((total, x) => (x === "" ? total : total + 1), 0);
 	const ready4csv = transpose([["Truth", ...merged.file1], ["Hypothesis", ...merged.file2]]);
 	return ready4csv;
 }
@@ -174,7 +176,6 @@ const startWorkWithNewRecord = () => {
 	currentTableContents = exportDiff(thisTruth, thisHyp);
 	redrawTable();
 	updateSentenceIdDisplay();
-
 }
 
 const updateRecordIdDisplay = () => document.getElementById("recordDisplay").innerHTML = "Participant: " + superArray[currentSuperArrayIndex]?.ResponseId;
@@ -183,18 +184,20 @@ const updateSentenceIdDisplay = () => document.getElementById("sentenceDisplay")
 const confirmThisRecordAndGoNext = () => {
 	if (superArray.length === 0) {
 		//example data case
+		if (!sanityCheck()) return;
 		output2Csv(currentTableContents, "aligner_example.csv");
 		document.getElementById("result").remove();
 		currentTableContents = [];
 		return;
 	}
 	removeSpaces()
+	if (!sanityCheck()) return;
 	moveCurrentTableToCache();
 	currentSentenceIndex++;
 	if (superArray[currentSuperArrayIndex][currentSentenceIndex] === undefined){
 		//end of this participant - do download
 		for (let i = 0; i < cachedCompletedUnformattedSentences.length; i++) formatArrayForCsv(cachedCompletedUnformattedSentences[i], i + 1);
-		const desiredFilename = `exp1-participant${superArray[currentSuperArrayIndex].ResponseId}-${new Date().toLocaleDateString().replaceAll("\/", "")}`;
+		const desiredFilename = `p${superArray[currentSuperArrayIndex].ResponseId}-exp1-${new Date().toLocaleDateString().replaceAll("\/", "")}`;
 		output2Csv(cachedCompletedSentences, desiredFilename);
 		
 		if (++currentSuperArrayIndex > superArray.length - 1){
@@ -240,4 +243,18 @@ const formatArrayForCsv = (arr, ind) => {
 	const [headers, ...keepCells] = arr;
 	keepCells.forEach(x=>x.unshift(superArray[currentSuperArrayIndex].ResponseId,...meta[ind].trim().split("-")));
 	cachedCompletedSentences = [...cachedCompletedSentences, ...keepCells];
+}
+
+const sanityCheck = () => {
+	const wordsNowInHyp = transpose(currentTableContents)[1].reduce((total, x) => (x === "" ? total : total + 1), 0);
+	//subtract one here because otherwise we're counting "hypothesis"
+	if (wordsNowInHyp - 1 !== mostRecentDiffStart) {
+		console.error("Word count mismatch!");
+		alert("Word count mismatch! Something may have gone wrong with this record!");
+		for (let i = 1; i < currentTableContents.length; i++) flagRow(i);
+		redrawTable();
+		throw "Word count mismatch! Something may have gone wrong with this record!";
+		return false;
+	}
+	return true;
 }

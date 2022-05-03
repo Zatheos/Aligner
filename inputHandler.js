@@ -125,28 +125,28 @@ const shunt = up => {
 	let workingArray = transpose([...currentTableContents]);
 	let nonEmptyCellIndex;
 	if (up){
-		for (let i = currentActiveTableCell.y; i > 0; i--){
-			if (workingArray[currentActiveTableCell.x][i] !== ""){
-				nonEmptyCellIndex = i;
-				break;
-			}
+		i = currentActiveTableCell.y;
+		while (nonEmptyCellIndex === undefined && i > 0){
+			if (workingArray[currentActiveTableCell.x][i] !== "") nonEmptyCellIndex = i;
+			else i--;
 		}
 	} else{
-		for (let i = currentActiveTableCell.y; i < workingArray[currentActiveTableCell.x].length; i++){
-			if (workingArray[currentActiveTableCell.x][i] !== ""){
-				nonEmptyCellIndex = i;
-				break;
-			}
+		i = currentActiveTableCell.y;
+		while (nonEmptyCellIndex === undefined && i < workingArray[currentActiveTableCell.x].length){
+			if (workingArray[currentActiveTableCell.x][i] !== "") nonEmptyCellIndex = i;
+			else i++;
 		}
 	}
 	const startLookingForEmptyCellsHere = nonEmptyCellIndex ?? currentActiveTableCell.y;
-	const emptyCellIndex = up ? workingArray[currentActiveTableCell.x].lastIndexOf("", startLookingForEmptyCellsHere) : workingArray[currentActiveTableCell.x].indexOf("", startLookingForEmptyCellsHere);
+	const emptyCellIndex = up ? 
+		workingArray[currentActiveTableCell.x].lastIndexOf("", startLookingForEmptyCellsHere) : 
+		workingArray[currentActiveTableCell.x].indexOf("", startLookingForEmptyCellsHere);
 
 	if (emptyCellIndex === undefined || emptyCellIndex === -1) return;
 	const deleted = workingArray[currentActiveTableCell.x].splice(emptyCellIndex, 1);
 	workingArray[currentActiveTableCell.x].splice(currentActiveTableCell.y, 0, '');
-	if (!deleted.every(x=>x === '') || deleted.length !== 1) {
-		console.error("Aargh might havetried to delete something!");
+	if (!deleted.every(x => x === '') || deleted.length !== 1) {
+		console.error("Aargh! Might have tried to delete something! Doing nothing instead.");
 		return;
 	}
 	
