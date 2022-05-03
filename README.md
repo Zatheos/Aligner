@@ -6,6 +6,8 @@ The tool accepts a csv uploaded with headers "ResponseId" and then numbers (1-in
 
 Columns with any other headers (other than ResponseId or digits) will be ignored. Missing digits will cause those after the omission to be ignored - eg column headers of 1, 2, 3, 5, 6, 7 will allow the tool process sentences 1, 2, 3 and then stop.
 
+Cells containing commas or newlines (eg \r\n) will cause the tool to break as the csv reader is very basic.
+
 Priority was given to ensuring that words can never be deleted or reordered - only realigned (spaces inserted) within the given order. 
 
 Emphasis was given to writing code quickly rather than following strict best practice as this is sufficiently bespoke that it's unlikely to be used more than once or twice. 
