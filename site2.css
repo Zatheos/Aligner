@@ -244,3 +244,15 @@ transition: 0.25s;
 .subheading{
 	font-size:28px;
 }
+.footnote{
+	display: flex;
+	align-items: center;
+	border: 1px teal solid;
+	padding: 4px 10px 4px 7px;
+	border-radius: 5px;
+	font-size: 11px;
+	text-decoration: none;
+}
+.github-logo{
+	height: 15px;
+}
