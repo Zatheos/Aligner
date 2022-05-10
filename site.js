@@ -174,6 +174,7 @@ const startWorkWithNewRecord = () => {
 	const thisTruth = truth[currentSentenceIndex];
 	const thisHyp = superArray[currentSuperArrayIndex][currentSentenceIndex];
 	currentTableContents = exportDiff(thisTruth, thisHyp);
+	flagAllIfAppropriate();
 	redrawTable();
 	updateSentenceIdDisplay();
 }
@@ -211,11 +212,13 @@ const confirmThisRecordAndGoNext = () => {
 			document.getElementById("trangles").style.display = 'block';
 			document.getElementById("result").remove();
 		} else {
+			//start with next participant
 			cachedCompletedSentences = [defaultHeaders];
 			startWorkWithNewRecord();
 		}
 
 	}	else {
+		//next sentence for same participant
 		updateSentenceIdDisplay();
 		currentActiveTableCell = { ...defaultSelection };
 		const thisTruth = truth[currentSentenceIndex];
