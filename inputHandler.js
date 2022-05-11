@@ -158,4 +158,5 @@ const goBack = () => {
 	if (!(currentSentenceIndex > 1)) return;
 	currentSentenceIndex--;
 	currentTableContents = cachedCompletedUnformattedSentences.pop();	
+	startWorkWithNewSentence();
 }

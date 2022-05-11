@@ -1,2 +1,3 @@
 *.csv
 csvs/export intention.png
+.vscode/settings.json

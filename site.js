@@ -150,9 +150,9 @@ const beginWorkWithNewFile = () => {
 		return;
 	} else { 
 		currentSuperArrayIndex = 0;
-		const startWith = prompt("Please enter the id of the last record you completed:", "");
+		const startWith = prompt("Please enter the id of the last record you completed:", loadParticipantId()??"");
 		if (startWith == null || startWith == "") {
-			//get here if prompt is cancelle
+			//get here if prompt is cancelled
 		} else {
 			const foundIndex = superArray.findIndex(x=>x.ResponseId === startWith);
 			if (foundIndex === -1) {
@@ -191,7 +191,7 @@ const confirmThisRecordAndGoNext = () => {
 		currentTableContents = [];
 		return;
 	}
-	removeSpaces()
+	removeSpaces();
 	if (!sanityCheck()) return;
 	moveCurrentTableToCache();
 	currentSentenceIndex++;
@@ -199,6 +199,7 @@ const confirmThisRecordAndGoNext = () => {
 		//end of this participant - do download
 		for (let i = 0; i < cachedCompletedUnformattedSentences.length; i++) formatArrayForCsv(cachedCompletedUnformattedSentences[i], i + 1);
 		const desiredFilename = `p${superArray[currentSuperArrayIndex].ResponseId}-exp1-${new Date().toLocaleDateString().replaceAll("\/", "")}`;
+		saveParticipantId();
 		output2Csv(cachedCompletedSentences, desiredFilename);
 		
 		if (++currentSuperArrayIndex > superArray.length - 1){
@@ -219,10 +220,20 @@ const confirmThisRecordAndGoNext = () => {
 
 	}	else {
 		//next sentence for same participant
-		updateSentenceIdDisplay();
-		currentActiveTableCell = { ...defaultSelection };
-		const thisTruth = truth[currentSentenceIndex];
-		const thisHyp = superArray[currentSuperArrayIndex][currentSentenceIndex];
+		startWorkWithNewSentence();
+	}
+}
+
+const startWorkWithNewSentence = () => {
+	updateSentenceIdDisplay();
+	currentActiveTableCell = { ...defaultSelection };
+	const thisTruth = truth[currentSentenceIndex];
+	const thisHyp = superArray[currentSuperArrayIndex][currentSentenceIndex];
+	if (!thisHyp?.length > 0) {
+		currentSentenceIndex++;
+		startWorkWithNewSentence();
+		return;
+	} else {
 		currentTableContents = exportDiff(thisTruth, thisHyp);
 		flagAllIfAppropriate();
 		redrawTable();
@@ -261,3 +272,6 @@ const sanityCheck = () => {
 	}
 	return true;
 }
+
+const saveParticipantId = () => localStorage.setItem("participantId", superArray[currentSuperArrayIndex].ResponseId);
+const loadParticipantId = () => localStorage.getItem("participantId");
