@@ -5,7 +5,7 @@ let currentTableContents = [];
 let currentSuperArrayIndex;
 let currentSentenceIndex;
 
-const defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "Truth", "Hypothesis", "Flagged"];
+const defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "WordNo", "Truth", "Hypothesis", "Flagged"];
 let cachedCompletedSentences = [defaultHeaders];
 let cachedCompletedUnformattedSentences = [];
 let mostRecentDiffStart;
@@ -255,6 +255,8 @@ const flagAllIfAppropriate = () => {
 
 const formatArrayForCsv = (arr, ind) => {
 	const [headers, ...keepCells] = arr;
+	let count = 0;
+	keepCells.map(x=>x.unshift(x[0].length > 0 ? ++count : ''));
 	keepCells.forEach(x=>x.unshift(superArray[currentSuperArrayIndex].ResponseId,...meta[ind].trim().split("-")));
 	cachedCompletedSentences = [...cachedCompletedSentences, ...keepCells];
 }
