@@ -167,7 +167,7 @@ table#result, #result th, #result td{
 	color: black;
 }
 
-#result td:nth-child(3), #result th:nth-child(3){
+#result td:nth-child(n+3), #result th:nth-child(n+3){
 	min-width: 0;
 }
 

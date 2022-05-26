@@ -5,7 +5,7 @@ let currentTableContents = [];
 let currentSuperArrayIndex;
 let currentSentenceIndex;
 
-const defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "WordNo", "Truth", "Hypothesis", "Flagged"];
+const defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "WordNo", "Truth", "Hypothesis", "Flagged", "Match"];
 let cachedCompletedSentences = [defaultHeaders];
 let cachedCompletedUnformattedSentences = [];
 let mostRecentDiffStart;
@@ -95,7 +95,13 @@ const exportDiff = (string1, string2) => {
 	return ready4csv;
 }
 
+//not referenced anywhere
+const retryLastDownload = () => output2Csv(JSON.parse(localStorage.getItem("lastParticipantData")));
+
 const output2Csv = (arr, filename = "my_data.csv") => {
+	//probably overkill, but just to protect against cancelled downloads
+	localStorage.setItem("lastParticipantData", JSON.stringify(arr));
+
 	if (!filename.endsWith(".csv")) filename+= ".csv";
 	const csvStuff = arrayToCSV(arr);
 	const csvContent = "data:text/csv;charset=utf-8," + csvStuff;

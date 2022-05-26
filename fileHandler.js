@@ -22,11 +22,8 @@ let meta;
 const processInputFile = e => {
 	const text = e.target.result;
 	let workingArray = CSVToArray(text);
-	console.log(workingArray);
 	workingArray = padArray(workingArray);
-	console.log(workingArray);
 	workingArray = nestedArray2ObjArray(workingArray);
-	console.log(workingArray);
 
 	const indexOfTruth = workingArray.findIndex(x => x.ResponseId?.toLowerCase()?.trim() === 'truth');
 	if (indexOfTruth === -1) {
