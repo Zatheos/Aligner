@@ -5,7 +5,7 @@ let currentTableContents = [];
 let currentSuperArrayIndex;
 let currentSentenceIndex;
 
-const defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "WordNo", "Truth", "Hypothesis", "Flagged", "Match"];
+const defaultHeaders = ["Participant", "Speaker", "Sentence", "SNR", "WordNo", "Truth", "Hypothesis", "Match", "Grammar", "Flagged"];
 let cachedCompletedSentences = [defaultHeaders];
 let cachedCompletedUnformattedSentences = [];
 let mostRecentDiffStart;
@@ -50,7 +50,7 @@ const merge = (...objs) =>
 
 const transpose = arr => arr[0].map((col, i) => arr.map(row => row[i]));
 
-const cleanup = str => str.replace(/[.,\/#!?$%\^&\*;:{}=\-_`~()]/g, "")
+const cleanup = str => str.replace(/[.,\/#!?$%\^&\*;:{}=\-_'`~()]/g, "")
 	.replace(/\s+/g, " ")
 	.trim()
 	.split(" ")
@@ -168,10 +168,10 @@ const beginWorkWithNewFile = () => {
 				}
 			} else currentSuperArrayIndex = foundIndex + 1;
 		}
-		startWorkWithNewRecord();
+		startWorkWithNewParticipant();
 	}
 }
-const startWorkWithNewRecord = () => {
+const startWorkWithNewParticipant = () => {
 	updateRecordIdDisplay();
 	cachedCompletedUnformattedSentences = [];
 	//always start with first sentence for a record
@@ -188,7 +188,7 @@ const startWorkWithNewRecord = () => {
 const updateRecordIdDisplay = () => document.getElementById("recordDisplay").innerHTML = "Participant: " + superArray[currentSuperArrayIndex]?.ResponseId;
 const updateSentenceIdDisplay = () => document.getElementById("sentenceDisplay").innerHTML = currentSentenceIndex;
 
-const confirmThisRecordAndGoNext = () => {
+const confirmThisSentenceAndGoNext = () => {
 	if (superArray.length === 0) {
 		//example data case
 		if (!sanityCheck()) return;
@@ -221,7 +221,7 @@ const confirmThisRecordAndGoNext = () => {
 		} else {
 			//start with next participant
 			cachedCompletedSentences = [defaultHeaders];
-			startWorkWithNewRecord();
+			startWorkWithNewParticipant();
 		}
 
 	}	else {
@@ -235,15 +235,9 @@ const startWorkWithNewSentence = () => {
 	currentActiveTableCell = { ...defaultSelection };
 	const thisTruth = truth[currentSentenceIndex];
 	const thisHyp = superArray[currentSuperArrayIndex][currentSentenceIndex];
-	if (!thisHyp?.length > 0) {
-		currentSentenceIndex++;
-		startWorkWithNewSentence();
-		return;
-	} else {
-		currentTableContents = exportDiff(thisTruth, thisHyp);
-		flagAllIfAppropriate();
-		redrawTable();
-	}
+	currentTableContents = exportDiff(thisTruth, thisHyp);
+	flagAllIfAppropriate();
+	redrawTable();
 }
 
 const moveCurrentTableToCache = () => {
@@ -252,9 +246,8 @@ const moveCurrentTableToCache = () => {
 
 const flagAllIfAppropriate = () => {
 	const workingArray = transpose(currentTableContents);
-	const truthToHypRatio = workingArray[0].filter(x=>x !== '').length / workingArray[1].filter(x=>x !== '').length;
-	if (truthToHypRatio > 2){
-		for (let i = 1; i < currentTableContents.length; i++) flagRow(i);
+	if (workingArray[1].filter(x=>x !== '').length === 1){
+		for (let i = 1; i < currentTableContents.length; i++) flagRow(i, 4);
 		redrawTable();
 	}
 }

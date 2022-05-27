@@ -43,11 +43,15 @@ const keyhandler = e => {
 			redrawTable();
 		break;
 		case 'KeyF':
-			flagRow();
+			flagRow(undefined, 4);
 			redrawTable();
 		break;
 		case 'KeyM':
-			flagRow(undefined,true);
+			flagRow();
+			redrawTable();
+		break;
+		case 'KeyG':
+			flagRow(undefined, 3);
 			redrawTable();
 		break;
 		case 'KeyU':
@@ -68,7 +72,7 @@ const keyhandler = e => {
 		break;
 		case 'Enter':
 		case 'NumpadEnter':
-			confirmThisRecordAndGoNext();
+			confirmThisSentenceAndGoNext();
 			redrawTable();
 			e.preventDefault();
 		break;
@@ -116,17 +120,17 @@ const addClickTrigger = () => {
 	tds.forEach(td => td.addEventListener('click', onCellClick));
 }
 
-const flagRow = (rowNumber = currentActiveTableCell.y, isMatch = false) => {
-	const col = isMatch ? 3 : 2;
+const flagRow = (rowNumber = currentActiveTableCell.y, col = 2) => {
 	if (currentTableContents[rowNumber][col] === '*') currentTableContents[rowNumber][col] = '';
 	else {
 		currentTableContents[rowNumber][col] = '*';
-		if (currentTableContents[rowNumber][2] === undefined) currentTableContents[rowNumber][2] = ''; 
+		for (let i = col - 1; i > 1; i--)	currentTableContents[rowNumber][i] ??= ''; 
 	}
-	if (currentTableContents[0][2] === '' || currentTableContents[0][3] === '' ||
-			currentTableContents[0][2] === undefined || currentTableContents[0][3] === undefined) {
-		currentTableContents[0][2] = 'F';
-		currentTableContents[0][3] = 'M';
+	if (currentTableContents[0][2] === '' || currentTableContents[0][3] === '' || currentTableContents[0][4] === '' ||
+			currentTableContents[0][2] === undefined || currentTableContents[0][3] === undefined || currentTableContents[0][4] === undefined) {
+		currentTableContents[0][2] = 'M';
+		currentTableContents[0][3] = 'G';
+		currentTableContents[0][4] = 'F';
 	}
 	currentTableContents = padArray(currentTableContents);
 }
