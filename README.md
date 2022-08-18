@@ -11,3 +11,5 @@ Cells containing commas or newlines (eg \r\n) will cause the tool to break as th
 Priority was given to ensuring that words can never be deleted or reordered - only realigned (spaces inserted) within the given order. 
 
 Emphasis was given to writing code quickly rather than following strict best practice as this is sufficiently bespoke that it's unlikely to be used more than once or twice. 
+
+Moving forward I'd like to see the flagging methods generalised to allow the user to configure as many flags as they'd like, using a key of their choice, with a header of their choice. 
