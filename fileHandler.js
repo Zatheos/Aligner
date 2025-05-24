@@ -36,7 +36,7 @@ const processInputFile = e => {
 		console.error("Can't find the meta!");
 		return;
 	}
-	const metaObj = workingArray.splice(indexOfTruth, 1)[0];
+	const metaObj = workingArray.splice(indexOfMeta, 1)[0];
 
 	truth = truthObj;
 	meta = metaObj;

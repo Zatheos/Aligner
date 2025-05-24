@@ -50,7 +50,8 @@ const merge = (...objs) =>
 
 const transpose = arr => arr[0].map((col, i) => arr.map(row => row[i]));
 
-const cleanup = str => str.replace(/[.,\/#!?$%\^&\*;:{}=\-_'`~()]/g, "")
+const cleanup = str => str.replace(/[-]/g, " ")
+	.replace(/[.,\/#!?$%\^&\*;:{}=\-_'`~()]/g, "")
 	.replace(/\s+/g, " ")
 	.trim()
 	.split(" ")
