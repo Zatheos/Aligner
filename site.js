@@ -55,7 +55,8 @@ const cleanup = str => str.replace(/[-]/g, " ")
 	.replace(/\s+/g, " ")
 	.trim()
 	.split(" ")
-	.map(x => removeAccents(x.toLowerCase().trim()));
+	.map(x => removeAccents(x.toLowerCase().trim()))
+	.join(" ");
 
 
 const createTable = arr => {
@@ -84,16 +85,57 @@ const createTable = arr => {
 const exportDiff = (string1, string2) => {
 	const file1mod = cleanup(string1);
 	const file2mod = cleanup(string2);
-	const res = diff(file1mod, file2mod);
+	const res = Diff["diffWords"](file1mod, file2mod);
 	const decommoned = res.map(x => ({
-		file1: x?.common ?? x.file1,
-		file2: x?.common ?? x.file2
+		file1: x.added ? "" : x.value.split(" "),
+		file2: x.removed ? "" : x.value.split(" ")
 	}));
-	const padded4parity = decommoned.map(x => padObject(x));
+	const moreAligned = makeDelAndInsAligned(decommoned);
+	const padded4parity = moreAligned.map(x => padObject(x));
 	const merged = merge(...padded4parity);
 	mostRecentDiffStart = merged.file2.reduce((total, x) => (x === "" ? total : total + 1), 0);
 	const ready4csv = transpose([["Truth", ...merged.file1], ["Hypothesis", ...merged.file2]]);
 	return ready4csv;
+}
+
+const makeDelAndInsAligned = arr => {
+	let memory = {type: null, idx: null, length: null}
+	for (let i = 0; i < arr.length; i++) {
+		const thisItem = arr[i];
+		let itemType;
+		// if (thisItem.file1 === thisItem.file2) itemType = "match";
+		if ((thisItem.file1.length === thisItem.file2.length) && (typeof(thisItem.file1) === typeof(thisItem.file2))) itemType = "match";
+		else if (thisItem.file1 === "") itemType = "ins";
+		else if (thisItem.file2 === "") itemType = "del";
+		else console.error("WTF");
+
+		if (itemType === "match") memory = {type: null, idx: null, length: null};
+		else {
+			if (memory.type === itemType) memory.length++;
+			else {
+				if (memory.type === null) memory = {type: itemType, idx: i, length: 1};
+				else {
+					const rememberedRow = arr[memory.idx];
+					if (rememberedRow.file1 !== "" && itemType === "del") console.error("Aargh");
+					else if (rememberedRow.file2 !== "" && itemType === "ins") console.error("Eerk");
+					else {
+						if (itemType === "ins"){
+							rememberedRow.file2 = thisItem.file2;
+							thisItem.file2 = "";
+						} else if  (itemType === "del"){
+							rememberedRow.file1 = thisItem.file1;
+							thisItem.file1 = "";
+						} 
+						memory.length--;
+						memory.idx++;
+						if (memory.length < 1)  memory = {type: null, idx: null, length: null};
+					}
+				}
+			}
+		}
+	}
+	return arr;
+
 }
 
 //not referenced anywhere
@@ -182,6 +224,7 @@ const startWorkWithNewParticipant = () => {
 	const thisHyp = superArray[currentSuperArrayIndex][currentSentenceIndex];
 	currentTableContents = exportDiff(thisTruth, thisHyp);
 	flagAllIfAppropriate();
+	removeSpaces();
 	redrawTable();
 	updateSentenceIdDisplay();
 }
@@ -238,6 +281,7 @@ const startWorkWithNewSentence = () => {
 	const thisHyp = superArray[currentSuperArrayIndex][currentSentenceIndex];
 	currentTableContents = exportDiff(thisTruth, thisHyp);
 	flagAllIfAppropriate();
+	removeSpaces();
 	redrawTable();
 }
 

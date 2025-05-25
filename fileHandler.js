@@ -21,7 +21,8 @@ let meta;
 
 const processInputFile = e => {
 	const text = e.target.result;
-	let workingArray = CSVToArray(text);
+	// let workingArray = CSVToArray(text);
+	let workingArray = csv2Array(text);
 	workingArray = padArray(workingArray);
 	workingArray = nestedArray2ObjArray(workingArray);
 
