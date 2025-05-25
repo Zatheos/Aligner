@@ -184,9 +184,8 @@ table#result, #result th, #result td{
 #result th{
 	background-color: white;
 }
-#result tr.mismatch{
-	background-color: yellow;
-}
+#result tr.mismatch{	background-color: yellow; }
+#result tr.ablank{	background-color: orange; }
 #result #active{
 	background-color: lightblue;
 }

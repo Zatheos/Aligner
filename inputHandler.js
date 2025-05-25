@@ -5,28 +5,28 @@ const keyhandler = e => {
 		case 'ArrowUp':
 			if (currentActiveTableCell.y > 1) {
 				currentActiveTableCell.y--;
-				redrawTable();
+				updateHighlightedCell();
 				e.preventDefault();
 			}
 		break;
 		case 'ArrowDown':
 			if (currentActiveTableCell.y < currentTableContents.length - 1) {
 				currentActiveTableCell.y++;
-				redrawTable();
+				updateHighlightedCell();
 				e.preventDefault();
 			}
 		break;
 		case 'ArrowLeft':
 			if (currentActiveTableCell.x > 0) {
 				currentActiveTableCell.x--;
-				redrawTable();
+				updateHighlightedCell();
 				e.preventDefault();
 			}
 		break;
 		case 'ArrowRight':
 			if (currentActiveTableCell.x < 1) {
 				currentActiveTableCell.x++;
-				redrawTable();
+				updateHighlightedCell();
 				e.preventDefault();
 			}
 		break;
@@ -80,6 +80,12 @@ const keyhandler = e => {
 }
 document.addEventListener('keydown', keyhandler);
 
+const updateHighlightedCell = () => {
+	document.getElementById("active").setAttribute("id", "");
+	document.getElementById("result").querySelectorAll("tr")[currentActiveTableCell.y].querySelectorAll("td")[currentActiveTableCell.x].setAttribute("id", "active");
+	document.getElementById("active").scrollIntoView({behavior: "instant", block: "center", inline: "nearest"});
+}
+
 const insertCell = above => {
 	let workingArray = transpose([...currentTableContents]);
 	workingArray[currentActiveTableCell.x].splice(currentActiveTableCell.y + (above ? 0 : 1), 0, '');
@@ -111,7 +117,7 @@ const addClickTrigger = () => {
 		let col = evt.target.cellIndex;
 		if (col > 1) col = 1;
 		currentActiveTableCell = {x:col, y:row};
-		redrawTable();
+		updateHighlightedCell();
 	}
 	
 	const myTable = document.getElementById('result');

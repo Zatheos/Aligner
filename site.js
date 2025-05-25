@@ -68,7 +68,10 @@ const createTable = arr => {
 
 	arr.forEach((rowData, index) => {
 		const row = document.createElement('tr');
-		if (rowData[0] !== rowData[1]) row.classList.add("mismatch");
+		if (rowData[0] !== rowData[1]) {
+			if (rowData[0] === "" || rowData[1] === "") row.classList.add("ablank");
+			else row.classList.add("mismatch");
+		}
 		rowData.forEach((cellData, ind2) => {
 			const cell = document.createElement(index === 0 ? 'th' : 'td');
 			if (index === currentActiveTableCell.y && ind2 === currentActiveTableCell.x) cell.setAttribute("id", "active");
@@ -135,7 +138,6 @@ const makeDelAndInsAligned = arr => {
 		}
 	}
 	return arr;
-
 }
 
 //not referenced anywhere
