@@ -123,10 +123,6 @@ const handleExceptions = arr => {
 	}
 	return arr;
 }
-const combineCellWithLineAbove = () => {
-	currentTableContents[currentActiveTableCell.y-1][currentActiveTableCell.x] += currentTableContents[currentActiveTableCell.y][currentActiveTableCell.x];
-	currentTableContents[currentActiveTableCell.y][currentActiveTableCell.x] = "";
-}
 
 const makeDelAndInsAligned = arr => {
 	let memory = {type: null, idx: null, length: null}
@@ -261,49 +257,8 @@ const startWorkWithNewParticipant = () => {
 const updateRecordIdDisplay = () => document.getElementById("recordDisplay").innerHTML = "Participant: " + superArray[currentSuperArrayIndex]?.ResponseId;
 const updateSentenceIdDisplay = () => document.getElementById("sentenceDisplay").innerHTML = currentSentenceIndex;
 
-const confirmThisSentenceAndGoNext = () => {
-	if (superArray.length === 0) {
-		//example data case
-		if (!sanityCheck()) return;
-		output2Csv(currentTableContents, "aligner_example.csv");
-		document.getElementById("result").remove();
-		currentTableContents = [];
-		return;
-	}
-	removeSpaces();
-	if (!sanityCheck()) return;
-	moveCurrentTableToCache();
-	currentSentenceIndex++;
-	if (superArray[currentSuperArrayIndex][currentSentenceIndex] === undefined){
-		//end of this participant - do download
-		for (let i = 0; i < cachedCompletedUnformattedSentences.length; i++) formatArrayForCsv(cachedCompletedUnformattedSentences[i], i + 1);
-		const desiredFilename = `p${superArray[currentSuperArrayIndex].ResponseId}-exp1-${new Date().toLocaleDateString().replaceAll("\/", "")}`;
-		saveParticipantId();
-		output2Csv(cachedCompletedSentences, desiredFilename);
-		
-		if (++currentSuperArrayIndex > superArray.length - 1){
-			//no more participants - finished
-			currentTableContents = [];
-			document.getElementById("recordDisplay").innerHTML = "File completed!";
-			document.getElementById("sentenceDisplay").innerHTML = '';
-			const form = document.getElementById("myForm")
-			form.removeAttribute("disabled");
-			form.removeAttribute("hidden");
-			document.getElementById("trangles").style.display = 'block';
-			document.getElementById("result").remove();
-		} else {
-			//start with next participant
-			cachedCompletedSentences = [defaultHeaders];
-			startWorkWithNewParticipant();
-		}
-
-	}	else {
-		//next sentence for same participant
-		startWorkWithNewSentence();
-	}
-}
-
 const startWorkWithNewSentence = () => {
+	undo.blank();
 	updateSentenceIdDisplay();
 	currentActiveTableCell = { ...defaultSelection };
 	const thisTruth = truth[currentSentenceIndex];

@@ -35,6 +35,12 @@ body * {
 	text-align: left;
 	font-size: 12px;
 }
+#recordDisplay, #sentenceDisplay{
+	position: fixed;
+	top: 25%;
+	left: 20px;
+}
+#sentenceDisplay{ top: 30%;}
 
 input:checked + ul{
 	padding-left: 10px;

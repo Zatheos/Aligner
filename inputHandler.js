@@ -74,6 +74,14 @@ const keyhandler = e => {
 			removeSpaces();
 			redrawTable();
 		break;
+		case 'KeyR':
+			undo.fullReset();
+			redrawTable();
+		break;
+		case 'KeyZ':
+			undo.revert();
+			redrawTable();
+		break;
 		case 'Enter':
 		case 'NumpadEnter':
 			confirmThisSentenceAndGoNext();
@@ -91,6 +99,7 @@ const updateHighlightedCell = () => {
 }
 
 const insertCell = above => {
+	undo.add();
 	let workingArray = transpose([...currentTableContents]);
 	workingArray[currentActiveTableCell.x].splice(currentActiveTableCell.y + (above ? 0 : 1), 0, '');
 	workingArray = padArray(workingArray);
@@ -98,6 +107,7 @@ const insertCell = above => {
 }
 
 const deleteCell = () => {
+	undo.add();
 	let workingArray = transpose([...currentTableContents]);
 	if (workingArray[currentActiveTableCell.x][currentActiveTableCell.y] !== '') return;
 	workingArray[currentActiveTableCell.x].splice(currentActiveTableCell.y, 1);
@@ -106,6 +116,7 @@ const deleteCell = () => {
 }
 
 const removeSpaces = () => {
+	undo.add();
 	const workingArray = [...currentTableContents];
 	let i = 0;
 	while (workingArray[i] !== undefined){
@@ -131,6 +142,7 @@ const addClickTrigger = () => {
 }
 
 const flagRow = (rowNumber = currentActiveTableCell.y, col = 2) => {
+	undo.add();
 	if (currentTableContents[rowNumber][col] === '*') currentTableContents[rowNumber][col] = '';
 	else {
 		currentTableContents[rowNumber][col] = '*';
@@ -146,6 +158,7 @@ const flagRow = (rowNumber = currentActiveTableCell.y, col = 2) => {
 }
 
 const shunt = up => {
+	undo.add();
 	let workingArray = transpose([...currentTableContents]);
 	let nonEmptyCellIndex;
 	if (up){
@@ -183,4 +196,73 @@ const goBack = () => {
 	currentSentenceIndex--;
 	currentTableContents = cachedCompletedUnformattedSentences.pop();	
 	startWorkWithNewSentence();
+}
+
+const combineCellWithLineAbove = () => {
+	undo.add();
+	currentTableContents[currentActiveTableCell.y-1][currentActiveTableCell.x] += currentTableContents[currentActiveTableCell.y][currentActiveTableCell.x];
+	currentTableContents[currentActiveTableCell.y][currentActiveTableCell.x] = "";
+}
+
+const undoBuffer = () => {
+	let record = [];
+	return {
+		add: () => record.push(currentTableContents.map(x=>[...x])),
+		revert: () => {
+			currentTableContents = record.pop()??currentTableContents;
+		},
+		fullReset: () => {
+			if (confirm("Are you sure you want to revert ALL changes to this record?"))
+			{	
+				currentTableContents = record[0]??currentTableContents;
+				record = [];
+			};
+		},
+		blank: () => record = []
+	}
+}
+const undo = undoBuffer();
+
+
+
+const confirmThisSentenceAndGoNext = () => {
+	if (superArray.length === 0) {
+		//example data case
+		if (!sanityCheck()) return;
+		output2Csv(currentTableContents, "aligner_example.csv");
+		document.getElementById("result").remove();
+		currentTableContents = [];
+		return;
+	}
+	removeSpaces();
+	if (!sanityCheck()) return;
+	moveCurrentTableToCache();
+	currentSentenceIndex++;
+	if (superArray[currentSuperArrayIndex][currentSentenceIndex] === undefined){
+		//end of this participant - do download
+		for (let i = 0; i < cachedCompletedUnformattedSentences.length; i++) formatArrayForCsv(cachedCompletedUnformattedSentences[i], i + 1);
+		const desiredFilename = `p${superArray[currentSuperArrayIndex].ResponseId}-exp1-${new Date().toLocaleDateString().replaceAll("\/", "")}`;
+		saveParticipantId();
+		output2Csv(cachedCompletedSentences, desiredFilename);
+		
+		if (++currentSuperArrayIndex > superArray.length - 1){
+			//no more participants - finished
+			currentTableContents = [];
+			document.getElementById("recordDisplay").innerHTML = "File completed!";
+			document.getElementById("sentenceDisplay").innerHTML = '';
+			const form = document.getElementById("myForm")
+			form.removeAttribute("disabled");
+			form.removeAttribute("hidden");
+			document.getElementById("trangles").style.display = 'block';
+			document.getElementById("result").remove();
+		} else {
+			//start with next participant
+			cachedCompletedSentences = [defaultHeaders];
+			startWorkWithNewParticipant();
+		}
+
+	}	else {
+		//next sentence for same participant
+		startWorkWithNewSentence();
+	}
 }
