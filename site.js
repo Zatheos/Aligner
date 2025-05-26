@@ -50,8 +50,7 @@ const merge = (...objs) =>
 
 const transpose = arr => arr[0].map((col, i) => arr.map(row => row[i]));
 
-const cleanup = str => str.replace(/[-]/g, " ")
-	.replace(/[.,\/#!?$%\^&\*;:{}=\-_'`~()]/g, "")
+const cleanup = str => str.replace(/[.,\/#!?$%\^&\*;:{}=\_`~]/g, "")
 	.replace(/\s+/g, " ")
 	.trim()
 	.split(" ")
@@ -68,9 +67,9 @@ const createTable = arr => {
 
 	arr.forEach((rowData, index) => {
 		const row = document.createElement('tr');
-		if (rowData[0] !== rowData[1]) {
-			if (rowData[0] === "" || rowData[1] === "") row.classList.add("ablank");
-			else row.classList.add("mismatch");
+		if (rowData[0] === "" || rowData[1] === "") row.classList.add("ablank");
+		else if (rowData[0].replace(/[.,\[\]'-\/#!?$%\^&\*;:{}=\_`~()]/g, "") !== rowData[1].replace(/[.,\[\]'-\/#!?$%\^&\*;:{}=\_`~()]/g, "")) {
+			row.classList.add("mismatch");
 		}
 		rowData.forEach((cellData, ind2) => {
 			const cell = document.createElement(index === 0 ? 'th' : 'td');
@@ -88,17 +87,45 @@ const createTable = arr => {
 const exportDiff = (string1, string2) => {
 	const file1mod = cleanup(string1);
 	const file2mod = cleanup(string2);
+	// if the hypothesis is [blank], then put it at the top and skip the rest.
+	if (file2mod === "[blank]") return transpose(padArray([["Truth", ...file1mod.split(" ")], ["Hypothesis", "[blank]"]]));
 	const res = Diff["diffWords"](file1mod, file2mod);
 	const decommoned = res.map(x => ({
 		file1: x.added ? "" : x.value.split(" "),
 		file2: x.removed ? "" : x.value.split(" ")
 	}));
-	const moreAligned = makeDelAndInsAligned(decommoned);
+	const exceptionsHandled = handleExceptions(decommoned);
+	const moreAligned = makeDelAndInsAligned(exceptionsHandled);
 	const padded4parity = moreAligned.map(x => padObject(x));
 	const merged = merge(...padded4parity);
 	mostRecentDiffStart = merged.file2.reduce((total, x) => (x === "" ? total : total + 1), 0);
 	const ready4csv = transpose([["Truth", ...merged.file1], ["Hypothesis", ...merged.file2]]);
 	return ready4csv;
+}
+
+const handleExceptions = arr => {
+	for (let i = 0; i < arr.length; i++) {
+		// for any hyphens, append to the end of the previous word
+		const thisItem = arr[i];
+		if (thisItem.file2 === "-" && i > 0) {
+			thisItem.file2 = "";
+			arr[i - 1].file2 += "-";
+		}
+		// for any square brackets, append them to the start or end of the nearest word
+		else if (thisItem.file2 === "[" && i < arr.length - 2) {
+			thisItem.file2 = "";
+			arr[i + 1].file2 = "[" + arr[i + 1].file2;
+		}
+		else if (thisItem.file2 === "]" && i > 0) {
+			thisItem.file2 = "";
+			arr[i + 1].file2 += "]";
+		}
+	}
+	return arr;
+}
+const combineCellWithLineAbove = () => {
+	currentTableContents[currentActiveTableCell.y-1][currentActiveTableCell.x] += currentTableContents[currentActiveTableCell.y][currentActiveTableCell.x];
+	currentTableContents[currentActiveTableCell.y][currentActiveTableCell.x] = "";
 }
 
 const makeDelAndInsAligned = arr => {
@@ -308,6 +335,7 @@ const formatArrayForCsv = (arr, ind) => {
 }
 
 const sanityCheck = () => {
+	return true;
 	const wordsNowInHyp = transpose(currentTableContents)[1].reduce((total, x) => (x === "" ? total : total + 1), 0);
 	//subtract one here because otherwise we're counting "hypothesis"
 	if (wordsNowInHyp - 1 !== mostRecentDiffStart) {

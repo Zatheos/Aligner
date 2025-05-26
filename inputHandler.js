@@ -46,6 +46,10 @@ const keyhandler = e => {
 			flagRow(undefined, 4);
 			redrawTable();
 		break;
+		case 'KeyC':
+			combineCellWithLineAbove();
+			redrawTable();
+		break;
 		case 'KeyM':
 			flagRow();
 			redrawTable();
