@@ -94,34 +94,37 @@ const exportDiff = (string1, string2) => {
 		file1: x.added ? "" : x.value.split(" "),
 		file2: x.removed ? "" : x.value.split(" ")
 	}));
-	const exceptionsHandled = handleExceptions(decommoned);
-	const moreAligned = makeDelAndInsAligned(exceptionsHandled);
+	const moreAligned = makeDelAndInsAligned(decommoned);
 	const padded4parity = moreAligned.map(x => padObject(x));
 	const merged = merge(...padded4parity);
-	mostRecentDiffStart = merged.file2.reduce((total, x) => (x === "" ? total : total + 1), 0);
-	const ready4csv = transpose([["Truth", ...merged.file1], ["Hypothesis", ...merged.file2]]);
+	const exceptionsHandled = handleExceptions(merged);
+	mostRecentDiffStart = exceptionsHandled.file2.reduce((total, x) => (x === "" ? total : total + 1), 0);
+	const ready4csv = transpose([["Truth", ...exceptionsHandled.file1], ["Hypothesis", ...exceptionsHandled.file2]]);
 	return ready4csv;
 }
 
-const handleExceptions = arr => {
-	for (let i = 0; i < arr.length; i++) {
-		// for any hyphens, append to the end of the previous word
-		const thisItem = arr[i];
-		if (thisItem.file2 === "-" && i > 0) {
-			thisItem.file2 = "";
-			arr[i - 1].file2 += "-";
+const handleExceptions = obj => {
+	const handle = arr => {
+		for (let i = 0; i < arr.length; i++) {
+			// for any hyphens, append to the end of the previous word
+			if (arr[i] === "-" && i > 0) {
+				arr[i] = "";
+				arr[i - 1] += "-";
+			}
+			// for any square brackets, append them to the start or end of the nearest word
+			else if (arr[i] === "[" && i < arr.length - 2) {
+				arr[i] = "";
+				arr[i + 1] = "[" + arr[i + 1];
+			}
+			else if (arr[i] === "]" && i > 0) {
+				arr[i] = "";
+				arr[i - 1] += "]";
+			}
 		}
-		// for any square brackets, append them to the start or end of the nearest word
-		else if (thisItem.file2 === "[" && i < arr.length - 2) {
-			thisItem.file2 = "";
-			arr[i + 1].file2 = "[" + arr[i + 1].file2;
-		}
-		else if (thisItem.file2 === "]" && i > 0) {
-			thisItem.file2 = "";
-			arr[i + 1].file2 += "]";
-		}
-	}
-	return arr;
+		return arr;
+	}	
+	const handled = {file1: handle(obj.file1), file2: handle(obj.file2)}
+	return handled;
 }
 
 const makeDelAndInsAligned = arr => {
@@ -255,7 +258,7 @@ const startWorkWithNewParticipant = () => {
 }
 
 const updateRecordIdDisplay = () => document.getElementById("recordDisplay").innerHTML = "Participant: " + superArray[currentSuperArrayIndex]?.ResponseId;
-const updateSentenceIdDisplay = () => document.getElementById("sentenceDisplay").innerHTML = currentSentenceIndex;
+const updateSentenceIdDisplay = () => document.getElementById("sentenceDisplay").innerHTML = "Sentence: " + currentSentenceIndex;
 
 const startWorkWithNewSentence = () => {
 	undo.blank();
